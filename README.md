@@ -1,1 +1,1 @@
-#PurpleSchool GO Advanced course homework
+PurpleSchool GO Advanced course homework

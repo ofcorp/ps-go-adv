@@ -17,8 +17,11 @@ func NewHelloHandler(router *http.ServeMux) {
 func (handler *RandHandler) Hello() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		x, err := crand.Int(crand.Reader, big.NewInt(6))
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 		n := int(x.Int64()) + 1
-		_ = err
 		w.Write([]byte(fmt.Sprintf("%d", n)))
 	}
 }

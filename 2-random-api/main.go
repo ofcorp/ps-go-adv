@@ -15,5 +15,8 @@ func main() {
 	}
 
 	fmt.Println("Server is listening on port 8081")
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		fmt.Println("Error starting server:", err)
+	}
 }

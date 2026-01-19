@@ -1,6 +1,7 @@
 package verify
 
 import (
+	"log"
 	"net/http"
 	"net/smtp"
 	"ps-go-adv/3-validation-api/configs"
@@ -8,6 +9,7 @@ import (
 	"ps-go-adv/3-validation-api/pkg/req"
 	"ps-go-adv/3-validation-api/pkg/res"
 	"ps-go-adv/3-validation-api/repository"
+
 	"github.com/jordan-wright/email"
 )
 
@@ -38,10 +40,12 @@ func (handler *VerifyHandler) Send() http.HandlerFunc {
 		}
 		hash, err := common.UniqueHash()
 		if err != nil {
+			res.Json(w, "Ошибка добавления в базу", http.StatusInternalServerError)
 			return
 		}
 		err = handler.Storage.AddItem(body.Email, hash)
 		if err != nil {
+			res.Json(w, "Ошибка добавления в базу", http.StatusInternalServerError)
 			return
 		}
 		e := email.NewEmail()
@@ -49,7 +53,12 @@ func (handler *VerifyHandler) Send() http.HandlerFunc {
 		e.To = []string{body.Email}
 		e.Subject = "Verification Email"
 		e.HTML = []byte("Click <a href='http://localhost:8081/verify/" + hash + "'>here</a> to verify your email.")
-		e.Send(handler.Mailer.Host, smtp.PlainAuth("", handler.Mailer.Email, handler.Mailer.Password, handler.Mailer.Host))
+		err = e.Send(handler.Mailer.Host, smtp.PlainAuth("", handler.Mailer.Email, handler.Mailer.Password, handler.Mailer.Host))
+		if err != nil {
+			res.Json(w, "Ошибка отправки письма", http.StatusInternalServerError)
+			return
+		}
+		log.Println("Проверочное письмо отправлено для:", body.Email)
 		data := SendResponse{
 			Hash: hash,
 		}

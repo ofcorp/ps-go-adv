@@ -12,3 +12,12 @@ type Product struct {
     Images      pq.StringArray
     Price			 float64
 }
+
+func NewProduct(name string, description string, images []string, price float64) *Product {
+    return &Product{
+        Name: name,
+        Description: description,
+        Images: images,
+        Price: price,
+    }
+}

@@ -5,6 +5,7 @@ import (
 	"ps-go-adv/4-order-api/configs"
 	"ps-go-adv/4-order-api/internal/product"
 	"ps-go-adv/4-order-api/pkg/db"
+	"ps-go-adv/4-order-api/pkg/middleware"
 
 	"net/http"
 )
@@ -19,9 +20,14 @@ func main() {
 		ProductRepository: productRepository,
 	})
 
+	stack := middleware.Chain(
+		middleware.CORS,
+		middleware.Logging,
+	)
+
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: stack(router),
 	}
 
 	fmt.Println("Server is listening on port 8081")

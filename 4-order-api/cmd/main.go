@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"ps-go-adv/4-order-api/configs"
+	"ps-go-adv/4-order-api/internal/auth"
 	"ps-go-adv/4-order-api/internal/product"
+	"ps-go-adv/4-order-api/internal/user"
 	"ps-go-adv/4-order-api/pkg/db"
 	"ps-go-adv/4-order-api/pkg/middleware"
 
@@ -16,8 +18,17 @@ func main() {
 	router := http.NewServeMux()
 
 	productRepository := product.NewProductRepository(db)
+	userRepository := user.NewUserRepository(db)
+
+	authService := auth.NewAuthService(userRepository)
+
 	product.NewProductHandler(router, product.ProductHandlerDeps{
 		ProductRepository: productRepository,
+	})
+
+	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
+		Config:      conf,
+		AuthService: authService,
 	})
 
 	stack := middleware.Chain(

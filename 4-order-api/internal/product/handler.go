@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"ps-go-adv/4-order-api/pkg/middleware"
 	"ps-go-adv/4-order-api/pkg/req"
 	"ps-go-adv/4-order-api/pkg/res"
 	"strconv"
@@ -22,9 +23,9 @@ func NewProductHandler(router *http.ServeMux, deps ProductHandlerDeps) {
 		ProductRepository: deps.ProductRepository,
 	}
 	router.HandleFunc("GET /product", handler.GetAll())
-	router.HandleFunc("POST /product", handler.Create())
-	router.HandleFunc("PATCH /product/{id}", handler.Update())
-	router.HandleFunc("DELETE /product/{id}", handler.Delete())
+	router.Handle("POST /product", middleware.IsAuthed(handler.Create()))
+	router.Handle("PATCH /product/{id}", middleware.IsAuthed(handler.Update()))
+	router.Handle("DELETE /product/{id}", middleware.IsAuthed(handler.Delete()))
 	router.HandleFunc("GET /product/{id}", handler.GetById())
 }
 

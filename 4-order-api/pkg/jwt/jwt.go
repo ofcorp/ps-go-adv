@@ -6,6 +6,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type JWTData struct {
+	Phone string
+}
+
 type JWT struct {
 	Secret string
 }
@@ -27,7 +31,7 @@ func (j *JWT) Create(phone string) (string, error) {
 	return s, nil
 }
 
-func (j *JWT) Validate(tokenString string) (jwt.MapClaims, error) {
+func (j *JWT) Validate(tokenString string) (*JWTData, error) {
     if tokenString == "" {
         return nil, errors.New(ErrEmptyToken)
     }
@@ -43,9 +47,11 @@ func (j *JWT) Validate(tokenString string) (jwt.MapClaims, error) {
     if !token.Valid {
         return nil, errors.New(ErrInvalidToken)
     }
-    claims, ok := token.Claims.(jwt.MapClaims)
+    phone, ok := token.Claims.(jwt.MapClaims)["phone"]
     if !ok {
         return nil, errors.New(ErrInvalidClaims)
     }
-    return claims, nil
+    return &JWTData{
+		Phone: phone.(string),
+	}, nil
 }

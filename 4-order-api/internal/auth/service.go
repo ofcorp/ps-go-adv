@@ -16,6 +16,10 @@ func NewAuthService(userRepository *user.UserRepository) *AuthService {
 }
 
 func (service *AuthService) Login(phone string) (string, error) {
+	validatePhoneNr := service.isE164(phone)
+	if !validatePhoneNr {
+		return "", errors.New(ErrInvalidPhoneNumber)
+	}
 	currentUser, _ := service.UserRepository.FindByPhone(phone)
 	if currentUser == nil {
 		currentUser = &user.User{
@@ -37,8 +41,12 @@ func (service *AuthService) Login(phone string) (string, error) {
 			break
 		}
 	}
-	currentUser.VerificationCode = "123456"
-	_, err := service.UserRepository.Update(currentUser)
+	verificationCode, err := service.genVerificationCode4()
+	if err != nil {
+		return "", err
+	}
+	currentUser.VerificationCode = verificationCode
+	_, err = service.UserRepository.Update(currentUser)
 	if err != nil {
 		return "", err
 	}
@@ -68,3 +76,30 @@ func (service *AuthService) genSessionID() (string, error) {
     }
     return string(out), nil
 }
+
+func (service *AuthService) genVerificationCode4() (string, error) {
+    const digits = "0123456789"
+    out := make([]byte, 4)
+    for i := range out {
+        n, err := rand.Int(rand.Reader, big.NewInt(int64(len(digits))))
+        if err != nil {
+            return "", err
+        }
+        out[i] = digits[n.Int64()]
+    }
+    return string(out), nil
+}
+
+func (service *AuthService) isE164(s string) bool {
+    if len(s) < 2 || len(s) > 16 || s[0] != '+' {
+        return false
+    }
+    for i := 1; i < len(s); i++ {
+        c := s[i]
+        if c < '0' || c > '9' {
+            return false
+        }
+    }
+    return s[1] != '0'
+}
+

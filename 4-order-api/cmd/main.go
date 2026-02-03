@@ -23,6 +23,7 @@ func main() {
 	authService := auth.NewAuthService(userRepository)
 
 	product.NewProductHandler(router, product.ProductHandlerDeps{
+		Config:         conf,
 		ProductRepository: productRepository,
 	})
 

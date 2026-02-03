@@ -28,7 +28,7 @@ func (repo *UserRepository) Update(user *User) (*User, error) {
 
 func (repo *UserRepository) FindByPhone(phone string) (*User, error) {
 	var user User
-	result := repo.database.DB.First(&user, phone)
+	result := repo.database.DB.First(&user, "phone = ?", phone)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -37,7 +37,7 @@ func (repo *UserRepository) FindByPhone(phone string) (*User, error) {
 
 func (repo *UserRepository) FindBySessionID(sessionID string) (*User, error) {
 	var user User
-	result := repo.database.DB.First(&user, sessionID)
+	result := repo.database.DB.First(&user, "session_id = ?", sessionID)
 	if result.Error != nil {
 		return nil, result.Error
 	}
